@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes wave {
+  0% { transform: translate(-50%, -75%) rotate(0deg); }
+  100% { transform: translate(-50%, -75%) rotate(360deg); }
+}
+
+.water-loader {
+  position: relative;
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.water-wave {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  border-radius: 40%;
+  background-color: #3b82f6; /* Bleu-500 */
+  animation: wave 5s infinite linear;
+  transform-origin: 50% 50%;
+  transition: top 0.5s ease-out;
+}
