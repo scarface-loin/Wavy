@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Camera, Users, Copy, Check, LogOut, Send, 
-  Mic, MicOff, Video, VideoOff, Hand, Loader2, 
+import {
+  Camera, Users, Copy, Check, LogOut, Send,
+  Mic, MicOff, Video, VideoOff, Hand, Loader2,
   Sparkles, MessageSquare, Link2
 } from 'lucide-react';
 
@@ -20,7 +20,7 @@ const SignLanguageMeet = () => {
   const [isMicOn, setIsMicOn] = useState(true);
   const [copied, setCopied] = useState(false);
   const [ws, setWs] = useState(null);
-  
+
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const handsRef = useRef(null);
@@ -97,13 +97,13 @@ const SignLanguageMeet = () => {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 1280, height: 720, facingMode: "user" },
         audio: true
       });
-      
+
       streamRef.current = stream;
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.onloadedmetadata = () => {
@@ -149,40 +149,40 @@ const SignLanguageMeet = () => {
 
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    
+
     if (!canvas || !video) return;
 
     const ctx = canvas.getContext('2d');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    
+
     ctx.save();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-    
+
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       for (const landmarks of results.multiHandLandmarks) {
         if (window.drawConnectors && window.drawLandmarks) {
-          window.drawConnectors(ctx, landmarks, window.HAND_CONNECTIONS, {color: '#60A5FA', lineWidth: 3});
-          window.drawLandmarks(ctx, landmarks, {color: '#F472B6', lineWidth: 1, radius: 4});
+          window.drawConnectors(ctx, landmarks, window.HAND_CONNECTIONS, { color: '#60A5FA', lineWidth: 3 });
+          window.drawLandmarks(ctx, landmarks, { color: '#F472B6', lineWidth: 1, radius: 4 });
         }
-        
+
         const gesture = recognizeGesture(landmarks);
-        
+
         if (gesture.conf > 70) {
-            setCurrentGesture(gesture.word);
-            setConfidence(gesture.conf);
-            
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({
-                type: 'gesture',
-                gesture: gesture.word,
-                confidence: gesture.conf,
-                username
-                }));
-            }
+          setCurrentGesture(gesture.word);
+          setConfidence(gesture.conf);
+
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+              type: 'gesture',
+              gesture: gesture.word,
+              confidence: gesture.conf,
+              username
+            }));
+          }
         }
       }
     }
@@ -200,7 +200,7 @@ const SignLanguageMeet = () => {
 
 
   const getWebSocketUrl = () => {
-    const backendUrl = 'wavy-server.onrender.com'; 
+    const backendUrl = 'wavy-server.onrender.com';
     return `wss://${backendUrl}`;
   };
 
@@ -209,7 +209,7 @@ const SignLanguageMeet = () => {
 
     const wsUrl = getWebSocketUrl();
     const socket = new WebSocket(`${wsUrl}/room/${roomId}`);
-    
+
     socket.onopen = () => {
       socket.send(JSON.stringify({ type: 'join', username, roomId }));
       setIsInRoom(true);
@@ -223,11 +223,11 @@ const SignLanguageMeet = () => {
       else if (data.type === 'participant_left') setParticipants(data.participants);
       else if (data.type === 'gesture' || data.type === 'message') {
         setMessages(prev => [...prev, {
-            user: data.username,
-            text: data.type === 'gesture' ? data.gesture : data.message,
-            isGesture: data.type === 'gesture',
-            confidence: data.confidence,
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          user: data.username,
+          text: data.type === 'gesture' ? data.gesture : data.message,
+          isGesture: data.type === 'gesture',
+          confidence: data.confidence,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }]);
       }
     };
@@ -382,35 +382,40 @@ const SignLanguageMeet = () => {
             <div className="hidden md:flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700">
               <span className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Code:</span>
               <span className="text-white font-mono font-bold select-all">{roomId}</span>
-              <button 
-                onClick={() => {navigator.clipboard.writeText(roomId); setCopied(true); setTimeout(() => setCopied(false), 2000)}} 
+              <button
+                onClick={() => { navigator.clipboard.writeText(roomId); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
                 className="text-slate-400 hover:text-white transition ml-1"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>
-          
+
+
+
           <div className="flex items-center gap-3">
-             <div className="hidden sm:flex -space-x-2">
-                {participants.slice(0, 3).map((p, i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-xs font-bold">
-                        {p.username.charAt(0)}
-                    </div>
-                ))}
-                {participants.length > 3 && (
-                    <div className="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center text-xs font-bold text-slate-400">
-                        +{participants.length - 3}
-                    </div>
-                )}
-             </div>
-            <button
-              onClick={() => { leaveRoom(); window.location.reload(); }}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl transition font-medium"
+            <div className="hidden sm:flex -space-x-2">
+              {participants.slice(0, 3).map((p, i) => (
+                <div key={i} className="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-xs font-bold">
+                  {p.username.charAt(0)}
+                </div>
+              ))}
+              {participants.length > 3 && (
+                <div className="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center text-xs font-bold text-slate-400">
+                  +{participants.length - 3}
+                </div>
+              )}
+            </div>
+            <a
+              href="/"
+              className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl transition font-medium text-decoration-none"
+              onClick={(e) => {
+                leaveRoom(); window.location.reload();
+              }}
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Quitter</span>
-            </button>
+            </a>
           </div>
         </div>
       </header>
@@ -419,13 +424,13 @@ const SignLanguageMeet = () => {
         <div className="flex-1 p-4 md:p-6 flex flex-col relative">
           <div className={`flex-1 relative bg-slate-900 rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 ${confidence > 80 ? 'ring-2 ring-blue-500 shadow-blue-500/20' : 'border border-slate-800'}`}>
             {cameraError && (
-               <div className="absolute inset-0 flex items-center justify-center z-50 bg-slate-900">
-                  <div className="text-center p-6 max-w-md">
-                     <VideoOff className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                     <h3 className="text-xl font-bold text-white mb-2">Erreur Caméra</h3>
-                     <p className="text-slate-400">{cameraError}</p>
-                  </div>
-               </div>
+              <div className="absolute inset-0 flex items-center justify-center z-50 bg-slate-900">
+                <div className="text-center p-6 max-w-md">
+                  <VideoOff className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-white mb-2">Erreur Caméra</h3>
+                  <p className="text-slate-400">{cameraError}</p>
+                </div>
+              </div>
             )}
 
             {isLoading && !cameraError && (
@@ -441,17 +446,17 @@ const SignLanguageMeet = () => {
 
             <div className="absolute top-6 left-6 flex items-center gap-3">
               <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                 <span className="font-semibold text-sm">{username} (Vous)</span>
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span className="font-semibold text-sm">{username} (Vous)</span>
               </div>
             </div>
 
             <div className="absolute bottom-8 left-0 right-0 flex justify-center px-4">
               <div className={`
                  backdrop-blur-xl border px-8 py-4 rounded-2xl transition-all duration-500 transform
-                 ${confidence > 70 
-                    ? 'bg-blue-600/20 border-blue-500/50 translate-y-0 opacity-100 scale-100' 
-                    : 'bg-black/60 border-white/10 translate-y-2 opacity-80 scale-95'}
+                 ${confidence > 70
+                  ? 'bg-blue-600/20 border-blue-500/50 translate-y-0 opacity-100 scale-100'
+                  : 'bg-black/60 border-white/10 translate-y-2 opacity-80 scale-95'}
               `}>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
@@ -461,14 +466,14 @@ const SignLanguageMeet = () => {
                     </div>
                   </div>
                   {confidence > 0 && (
-                     <div className="h-10 w-px bg-white/20"></div>
+                    <div className="h-10 w-px bg-white/20"></div>
                   )}
                   {confidence > 0 && (
                     <div className="text-center">
-                        <p className="text-xs text-slate-400 uppercase tracking-widest font-bold mb-1">Confiance</p>
-                        <span className={`text-xl font-bold ${confidence > 90 ? 'text-green-400' : 'text-blue-400'}`}>
+                      <p className="text-xs text-slate-400 uppercase tracking-widest font-bold mb-1">Confiance</p>
+                      <span className={`text-xl font-bold ${confidence > 90 ? 'text-green-400' : 'text-blue-400'}`}>
                         {Math.round(confidence)}%
-                        </span>
+                      </span>
                     </div>
                   )}
                 </div>
@@ -477,63 +482,63 @@ const SignLanguageMeet = () => {
           </div>
 
           <div className="mt-6 flex justify-center gap-4">
-             <button 
-                onClick={() => setIsMicOn(!isMicOn)}
-                className={`p-4 rounded-2xl transition-all ${isMicOn ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
-             >
-                {isMicOn ? <Mic /> : <MicOff />}
-             </button>
-             <button 
-                onClick={() => setIsCameraOn(!isCameraOn)}
-                className={`p-4 rounded-2xl transition-all ${isCameraOn ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/20' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
-             >
-                {isCameraOn ? <Video /> : <VideoOff />}
-             </button>
+            <button
+              onClick={() => setIsMicOn(!isMicOn)}
+              className={`p-4 rounded-2xl transition-all ${isMicOn ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
+            >
+              {isMicOn ? <Mic /> : <MicOff />}
+            </button>
+            <button
+              onClick={() => setIsCameraOn(!isCameraOn)}
+              className={`p-4 rounded-2xl transition-all ${isCameraOn ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/20' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
+            >
+              {isCameraOn ? <Video /> : <VideoOff />}
+            </button>
           </div>
         </div>
 
         <div className="w-80 md:w-96 bg-slate-900 border-l border-slate-800 flex flex-col shadow-2xl z-20">
           <div className="p-5 border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
             <h2 className="font-bold text-lg flex items-center gap-2">
-               <MessageSquare className="w-5 h-5 text-blue-500" />
-               Discussion en direct
+              <MessageSquare className="w-5 h-5 text-blue-500" />
+              Discussion en direct
             </h2>
             <p className="text-xs text-slate-500 mt-1">Les gestes détectés apparaissent ici</p>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.length === 0 && (
-                <div className="text-center text-slate-500 mt-10 p-4 border border-dashed border-slate-700 rounded-xl">
-                    <p>Aucun message encore.</p>
-                    <p className="text-sm mt-2">Faites un geste pour commencer ! 👋</p>
-                </div>
+              <div className="text-center text-slate-500 mt-10 p-4 border border-dashed border-slate-700 rounded-xl">
+                <p>Aucun message encore.</p>
+                <p className="text-sm mt-2">Faites un geste pour commencer ! 👋</p>
+              </div>
             )}
             {messages.map((msg, i) => (
               <div key={i} className={`flex flex-col ${msg.user === username ? 'items-end' : 'items-start'}`}>
-                 <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-bold text-slate-400">{msg.user}</span>
-                    <span className="text-[10px] text-slate-600">{msg.time}</span>
-                 </div>
-                 <div className={`
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold text-slate-400">{msg.user}</span>
+                  <span className="text-[10px] text-slate-600">{msg.time}</span>
+                </div>
+                <div className={`
                     p-3 rounded-2xl max-w-[90%] text-sm relative group
-                    ${msg.isGesture 
-                        ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 text-blue-100' 
-                        : 'bg-slate-800 border border-slate-700 text-slate-200'}
+                    ${msg.isGesture
+                    ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 text-blue-100'
+                    : 'bg-slate-800 border border-slate-700 text-slate-200'}
                  `}>
-                    {msg.isGesture && (
-                        <span className="absolute -top-2 -right-2 bg-blue-500 text-[10px] px-1.5 py-0.5 rounded-full text-white font-bold shadow-sm">
-                            IA
-                        </span>
-                    )}
-                    {msg.text}
-                 </div>
-                 {msg.isGesture && (
-                    <span className="text-[10px] text-blue-500/60 mt-1 px-1">Confiance: {Math.round(msg.confidence)}%</span>
-                 )}
+                  {msg.isGesture && (
+                    <span className="absolute -top-2 -right-2 bg-blue-500 text-[10px] px-1.5 py-0.5 rounded-full text-white font-bold shadow-sm">
+                      IA
+                    </span>
+                  )}
+                  {msg.text}
+                </div>
+                {msg.isGesture && (
+                  <span className="text-[10px] text-blue-500/60 mt-1 px-1">Confiance: {Math.round(msg.confidence)}%</span>
+                )}
               </div>
             ))}
           </div>
-          
+
           <div className="p-4 bg-slate-900 border-t border-slate-800">
             <div className="flex gap-2">
               <input
