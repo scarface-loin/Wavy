@@ -198,11 +198,10 @@ const SignLanguageMeet = () => {
     }
   };
 
+
   const getWebSocketUrl = () => {
-    if (window.location.hostname !== 'localhost') {
-      return `wss://${window.location.hostname}`;
-    }
-    return 'ws://localhost:8080';
+    const backendUrl = 'https://wavy-server.onrender.com'; 
+    return `wss://${backendUrl}`;
   };
 
   const joinRoom = () => {
