@@ -61,7 +61,7 @@ function App() {
         setLoadProgress(100);
         
         // Petit délai pour voir la jauge pleine avant d'ouvrir
-        setTimeout(() => setIsAppReady(true), 800);
+        setTimeout(() => setIsAppReady(true), 8000);
         
       } catch (error) {
         console.error("Erreur de chargement des scripts", error);

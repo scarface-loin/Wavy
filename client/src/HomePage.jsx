@@ -94,7 +94,7 @@ const HomePage = () => {
 
       {/* Footer */}
       <footer className="text-center py-8 text-slate-600 text-sm relative z-10">
-        <p>© 2024 Wavy Project • Propulsé par MediaPipe & WebSockets</p>
+        <p>© 2025 Soureya YAYA & Ndjeumou kambea steve</p>
       </footer>
     </div>
   );
