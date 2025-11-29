@@ -200,7 +200,7 @@ const SignLanguageMeet = () => {
 
 
   const getWebSocketUrl = () => {
-    const backendUrl = 'https://wavy-server.onrender.com'; 
+    const backendUrl = 'wavy-server.onrender.com'; 
     return `wss://${backendUrl}`;
   };
 
